@@ -39,6 +39,28 @@
 
 namespace ob = ompl::base;
 
+ob::StateSpacePtr createBounded2ndOrderHolonomicStateSpace(const unsigned int x_max, const unsigned int y_max, const unsigned int v_max=1)
+{
+    ob::StateSpacePtr space = std::make_shared<ob::CompoundStateSpace>();
+    space->as<ob::CompoundStateSpace>()->addSubspace(ob::StateSpacePtr(new ob::RealVectorStateSpace(4)), 1.0);
+    space->as<ob::CompoundStateSpace>()->addSubspace(ob::StateSpacePtr(new ob::SO2StateSpace()), 1.0);
+    space->as<ob::CompoundStateSpace>()->lock();
+
+    // set the bounds for the RealVectorStateSpace
+    ob::RealVectorBounds bounds(4);
+    bounds.setLow(0, 0);      // x_pos lower bound
+    bounds.setHigh(0, x_max); // x_pos upper bound
+    bounds.setLow(1, 0);      // y_pos lower bound
+    bounds.setHigh(1, y_max); // y_pos upper bound
+    bounds.setLow(2, -1); // x_vel lower bound
+    bounds.setHigh(2, 1); // x_vel upper bound
+    bounds.setLow(3, -1); // y_vel lower bount
+    bounds.setHigh(3, 1); // y_vel upper bound
+    space->as<ob::CompoundStateSpace>()->as<ob::RealVectorStateSpace>(0)->setBounds(bounds);
+
+    return space;
+}
+
 ob::StateSpacePtr createBounded2ndOrderCarStateSpace(const unsigned int x_max, const unsigned int y_max)
 {
     ob::StateSpacePtr space = std::make_shared<ob::CompoundStateSpace>();

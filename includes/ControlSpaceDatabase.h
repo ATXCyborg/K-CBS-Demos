@@ -53,6 +53,19 @@ oc::ControlSpacePtr createUniform2DRealVectorControlSpace(ob::StateSpacePtr &spa
     return cspace;
 }
 
+oc::ControlSpacePtr createUniform3DRealVectorControlSpace(ob::StateSpacePtr &space)
+{
+    auto cspace(std::make_shared<oc::RealVectorControlSpace>(space, 3));
+
+    //set the bounds for the control space
+    ob::RealVectorBounds cbounds(3);
+    cbounds.setLow(-1);
+    cbounds.setHigh(1);
+    cspace->setBounds(cbounds);
+
+    return cspace;
+}
+
 oc::ControlSpacePtr createUniform4DRealVectorControlSpace(ob::StateSpacePtr &space)
 {
     auto cspace(std::make_shared<oc::RealVectorControlSpace>(space, 4));

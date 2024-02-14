@@ -41,6 +41,34 @@
 namespace ob = ompl::base;
 namespace oc = ompl::control;
 
+void SecondOrderHolonomicODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc::ODESolver::StateType& qdot)
+{
+    // q = x_pos, y_pos, x_vel, y_vel, theta
+    // c = a_x, a_y, thetadot
+    const double *u = control->as<oc::RealVectorControlSpace::ControlType>()->values;
+    
+    // zero out qdot
+    qdot.resize(q.size(), 0);
+
+    // vehicle model
+    qdot[0] = q[2];
+    qdot[1] = q[3];
+    qdot[2] = u[0];
+    qdot[3] = u[1];
+    qdot[4] = u[2];
+
+}
+
+// callback for putting angle [0, 2pi]
+void SecondOrderHolonomicODEPostIntegration(const ob::State* /*state*/, const oc::Control* /*control*/, const double /*duration*/, ob::State *result)
+{
+    // wrap the angle
+    ob::CompoundState* cs = result->as<ob::CompoundState>();
+    ob::SO2StateSpace::StateType* angleState1 = cs->as<ob::SO2StateSpace::StateType>(1);
+    ob::SO2StateSpace SO2;
+    SO2.enforceBounds(angleState1);
+}
+
 void SecondOrderCarODE (const oc::ODESolver::StateType& q, const oc::Control* control, oc::ODESolver::StateType& qdot)
 {
     // q = x, y, v, phi, theta
