@@ -50,6 +50,7 @@ int readConfig(std::string filename)
             Json::Value agent = (*it);
             //std::pair<float, float> start_pos = {agent["start"][0][0], agent["start"][0][1]};
             start_map.insert(std::make_pair(it.key().asString(), std::make_pair(agent["start"][0][0].asFloat(), agent["start"][0][1].asFloat())));
+            goal_map.insert(std::make_pair(it.key().asString(), std::make_pair(agent["goal"][0][0].asFloat(), agent["goal"][0][1].asFloat())));
             //start_map.insert(std::make_pair(it.key().asString(), std::make_pair(0.5, 0.6)));
             //std::cout << agent["start"] << std::endl;
             //std::cout << key << std::endl;
@@ -73,11 +74,11 @@ void plan()
     std::cout << "Entering Planning Function." << std::endl; 
 
     // provide start and goals for every robot
-    std::unordered_map<std::string, std::pair<float, float>> start_map{   {"Robot 0", {11.5, 6}},
-                                                                        };
+    //std::unordered_map<std::string, std::pair<float, float>> start_map{   {"Robot 0", {11.5, 6}},
+    //                                                                    };
 
-    std::unordered_map<std::string, std::pair<int, int>> goal_map{    {"Robot 0", {7, 18}},
-                                                                       };
+    //std::unordered_map<std::string, std::pair<int, int>> goal_map{    {"Robot 0", {7, 18}},
+    //                                                                   };
 
     // construct all of the robots (assume square robots with unit length)
     std::unordered_map<std::string, Robot*> robot_map;
@@ -195,5 +196,5 @@ int main(int argc, char ** argv)
     std::cout << "Starting k-cbs from vmas data." << std::endl;
     int ret = readConfig("config.json");
     std::cout << "Successfully parsed in json data." << std::endl;
-    //plan();
+    plan();
 }
