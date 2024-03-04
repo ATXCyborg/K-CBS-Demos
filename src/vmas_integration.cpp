@@ -44,20 +44,13 @@ int readConfig(std::string filename)
         start_map.clear();
         goal_map.clear();
 
-        for (Json::Value::iterator it = root.begin(); it != root.end(); ++it)
+        for (Json::Value::iterator it = root.end(); it != root.begin();)
         {
+            it--;
             std::cout << "Parsing " << it.key() << " config" << std::endl;
             Json::Value agent = (*it);
-            //std::pair<float, float> start_pos = {agent["start"][0][0], agent["start"][0][1]};
             start_map.insert(std::make_pair(it.key().asString(), std::make_pair(agent["start"][0][0].asFloat(), agent["start"][0][1].asFloat())));
             goal_map.insert(std::make_pair(it.key().asString(), std::make_pair(agent["goal"][0][0].asFloat(), agent["goal"][0][1].asFloat())));
-            //start_map.insert(std::make_pair(it.key().asString(), std::make_pair(0.5, 0.6)));
-            //std::cout << agent["start"] << std::endl;
-            //std::cout << key << std::endl;
-            //std::cout << el["start"][0][0] << "," << el["start"][0][1] << std::endl;
-            //std::cout << it.key() << std::endl;
-            //Json::Value agent = &it;
-            //std::cout << "Start: " << agent["start"][0][0].asString() << "," << agent["start"][0][1].asString() << std::endl; 
         }
     }
     else
@@ -69,7 +62,7 @@ int readConfig(std::string filename)
     return EXIT_SUCCESS;
 }
 
-void plan()
+void plan(double threshold = 0.1)
 {
     std::cout << "Entering Planning Function." << std::endl; 
 
@@ -84,7 +77,8 @@ void plan()
     std::unordered_map<std::string, Robot*> robot_map;
     for(auto itr = start_map.begin(); itr != start_map.end(); itr++)
     {
-        Robot* robot = new RectangularRobot(itr->first, 0.7, 0.5);
+        //Robot* robot = new RectangularRobot(itr->first, 0.7, 0.5);
+        Robot* robot = new RectangularRobot(itr->first, 0.05, 0.05);
         robot_map[itr->first] = robot;
     }
     std::cout << "All robots constructed." << std::endl;
@@ -100,7 +94,7 @@ void plan()
         std::cout << "-------------------------------------------" << std::endl;
         std::cout << "Constructing for SE3" << std::endl;
         // construct the state space we are planning in
-        auto space = createBounded2ndOrderHolonomicStateSpace(32, 32);
+        auto space = createBounded2ndOrderHolonomicStateSpace(2, 2);
         std::cout << "Constructed state space." << std::endl;
 
         // name the state space parameter
@@ -147,7 +141,7 @@ void plan()
 
         // set the start and goal states
         pdef->addStartState(start);
-        pdef->setGoal(std::make_shared<GoalRegion2ndOrderCar>(si, goal_map.at(itr->first).first, goal_map.at(itr->first).second));
+        pdef->setGoal(std::make_shared<GoalRegion2ndOrderHolonomic>(si, goal_map.at(itr->first).first, goal_map.at(itr->first).second, threshold));
         std::cout << "Set the start and goal states." << std::endl;
 
         // add the individual information to the multi-robot SpaceInformation and Problem Definition
@@ -196,5 +190,5 @@ int main(int argc, char ** argv)
     std::cout << "Starting k-cbs from vmas data." << std::endl;
     int ret = readConfig("config.json");
     std::cout << "Successfully parsed in json data." << std::endl;
-    plan();
+    plan(0.1);
 }
